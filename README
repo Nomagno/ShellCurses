@@ -1,0 +1,3 @@
+This is a POSIX-Compliant fork of BashSimpleCurses (github.com/metal3d/bashsimplecurses)
+It's obviously hard to strip down a script, but it's currently compatible enough 
+with ZSH, and with KSH it only needs some escape sequence mangling. The objective is for it to eventually work with POSH.
