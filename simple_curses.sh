@@ -17,6 +17,7 @@
 #support for delay loop function (instead of sleep
 #enabling keyboard input) by Markus Mikkolainen
 
+ECHO=/bin/echo
 
 bsc_create_buffer(){
     # Try to use SHM, then $TMPDIR, then /tmp
@@ -130,9 +131,9 @@ _BLOCK="\033(01\033(B"
 _SPINNER='-'
 
 bsc_init_chars() {
-    if [ -z "$BSC_ASCIIMODE" ]; then BSC_ASCIIMODE=utf8; fi
-    if [ "$BSC_ASCIIMODE" != "" ]; then
-        if [ "$BSC_ASCIIMODE" = "ascii" ]; then
+
+    if [ "$LANG" != "" ]; then
+        if [ $(printf "\xE2\x96\x88") = "\\xE2\\x96\\x88" ]; then
             _TL="+"
             _TR="+"
             _BL="+"
@@ -143,8 +144,7 @@ bsc_init_chars() {
             _HLINE="-"
             _DIAMOND="*"
             _BLOCK="#"
-        fi
-        if [ "$BSC_ASCIIMODE" = "utf8" ]; then
+        elif [ $(echo "$LANG" | grep -c UTF) = "1" ]; then
             _TL="\xE2\x94\x8C"
             _TR="\xE2\x94\x90"
             _BL="\xE2\x94\x94"
@@ -250,9 +250,9 @@ window() {
 
     # Create an empty line for this window
     BSC_BLANKLINE=$(head -c "$BSC_COLWIDTH" /dev/zero | tr '\0' ' ')
-    BSC_LINEBODY=${BSC_BLANKLINE:2}
+    BSC_LINEBODY=${BSC_BLANKLINE}
     contentLen=${#BSC_LINEBODY}
-    BSC_LINEBODY=${BSC_LINEBODY// /$_HLINE}
+    BSC_LINEBODY=$(echo "$BSC_LINEBODY" | sed "s/ /$_HLINE/g")
 
     _len=""
     _len=${#_title}
@@ -270,7 +270,7 @@ window() {
     tput sc
 
     #draw upper line
-    echo -ne "$_TL$BSC_LINEBODY$_TR"
+    printf "$_TL$BSC_LINEBODY$_TR"
 
     #next line, draw title
     bsc__nl
@@ -281,38 +281,38 @@ window() {
 }
 
 reset_colors(){
-    echo -ne "\033[00m"
+    printf "\033[00m"
 }
 setcolor(){
     _color=""
     _color=$1
     case $_color in
         grey|gray)
-            echo -ne "\033[01;30m"
+            printf "\033[01;30m"
             ;;
         red)
-            echo -ne "\033[01;31m"
+            printf "\033[01;31m"
             ;;
         green)
-            echo -ne "\033[01;32m"
+            printf "\033[01;32m"
             ;;
         yellow)
-            echo -ne "\033[01;33m"
+            printf "\033[01;33m"
             ;;
         blue)
-            echo -ne "\033[01;34m"
+            printf "\033[01;34m"
             ;;
         magenta)
-            echo -ne "\033[01;35m"
+            printf "\033[01;35m"
             ;;
         cyan)
-            echo -ne "\033[01;36m"
+            printf "\033[01;36m"
             ;;
         white)
-            echo -ne "\033[01;37m"
+            printf "\033[01;37m"
             ;;
         *) #default should be 39 maybe?
-            echo -ne "\033[01;37m"
+            printf "\033[01;39m"
             ;;
     esac
 }
@@ -321,34 +321,34 @@ setbgcolor(){
     _2bgcolor=$1
     case $_2bgcolor in
         grey|gray)
-            echo -ne "\033[01;40m"
+            printf "\033[01;40m"
             ;;
         red)
-            echo -ne "\033[01;41m"
+            printf "\033[01;41m"
             ;;
         green)
-            echo -ne "\033[01;42m"
+            printf "\033[01;42m"
             ;;
         yellow)
-            echo -ne "\033[01;43m"
+            printf "\033[01;43m"
             ;;
         blue)
-            echo -ne "\033[01;44m"
+            printf "\033[01;44m"
             ;;
         magenta)
-            echo -ne "\033[01;45m"
+            printf "\033[01;45m"
             ;;
         cyan)
-            echo -ne "\033[01;46m"
+            printf "\033[01;46m"
             ;;
         white)
-            echo -ne "\033[01;47m"
+            printf "\033[01;47m"
             ;;
         black)
-            echo -ne "\033[01;49m"
+            printf "\033[01;49m"
             ;;
         *) #default should be 49
-            echo -ne "\033[01;49m"
+            printf "\033[01;49m"
             ;;
     esac
 
@@ -357,7 +357,7 @@ setbgcolor(){
 #append a separator, new line
 addsep (){
     clean_line
-    echo -ne "$_SEPL$BSC_LINEBODY$_SEPR"
+    $ECHO -ne "$_SEPL$BSC_LINEBODY$_SEPR"
     bsc__nl
 }
 
@@ -367,7 +367,7 @@ clean_line(){
     reset_colors
 
     tput sc
-    echo -ne "$BSC_BLANKLINE"
+    $ECHO -ne  "$BSC_BLANKLINE"
     #tput el
     tput rc
 }
@@ -396,23 +396,21 @@ blinkenlights(){
     _2incolor=$4
     _3bgcolor=$5
 
-    declare -a params
-    params=( "$@" )
-    unset "params[0]"
-    unset "params[1]"
-    unset "params[2]"
-    unset "params[3]"
-    unset "params[4]"
-    params=( "${params[@]}" )
+    params0="$1"
+    params1="$2"
+    params2="$3"
+    params3="$4"
+    params4="$5"
+    params5="$6"
 
     _2lights=""
-    while [ -n "$params" ];do
+    while [ -n "$params0" ];do
         _2col=$_2incolor
-        [ "${params[0]}" = "1" ] && _2col=$_2color
-        [ "${params[0]}" = "2" ] && _2col=$_color2
+        [ "${params0}" = "1" ] && _2col=$_2color
+        [ "${params0}" = "2" ] && _2col=$_color2
         _2lights="${_2lights} ${_DIAMOND} ${_2col} ${_3bgcolor}"
-        unset "params[0]"
-        params=( "${params[@]}" )
+        unset "params0"
+        
     done
 
     bsc__multiappend "left" "[" "$_2incolor" "$_3bgcolor" "$_2lights" "]${_2text}" "$_2incolor" "$_3bgcolor"
@@ -464,7 +462,7 @@ vumeter(){
     for i in $(seq 0 $(($_over)));do
         _red="${_red}|"
     done
-    _red=${_red:1}
+    _red=${_red}
     for i in $(seq 0 $(($_todo)));do
         _rest="${_rest}."
     done
@@ -493,22 +491,21 @@ progressbar(){
     _modulo=$(( $(date +%s) % 4 ))
 
     bar="[";
-    for (( c=1; c<=_done; c=$c+1 )); do
-        bar="${bar}${_BLOCK}"
-    done
+
     if [ "$_done" -lt "$_3len" ]; then
-        bar="${_bar}${_SPINNER[_modulo]}"
+        bar="${_bar}${_SPINNER}"
     fi
-    for (( c=1; c<=todo; c=$c+1 )); do
-        _bar="${_bar} "
-    done
+
     bar="${_bar}]"
     bsc__append "$_bar" "left" "$4" "$5"
 }
 append(){
+    tmp8=$(mktemp)
+    echo $1 > a
+    printf "%s\n"  "$1" | fold -w $((BSC_COLWIDTH-2)) -s > $tmp8
     while read -r line; do
         bsc__append "$line" "$2" "$3" "$4"
-    done < <(echo -e "$1" | fold -w $((BSC_COLWIDTH-2)) -s)
+    done < $tmp8
 }
 #
 #   append a single line of text consisting of multiple
@@ -519,42 +516,44 @@ bsc__multiappend(){
     _4len=""
     _7text=""
     declare -a params
-    params=( "$@" )
+    params0="$1"
+    params1="$2"
+    params2="$3"
     _text=""
-    unset "params[0]"
-    params=( "${params[@]}" )
+    unset "params0"
     while [ -n "$params" ];do
-        _text="${_7text}${params[0]}"
-        unset "params[0]"
-        unset "params[1]"
-        unset "params[2]"
-        params=( "${params[@]}" )
+        _text="${_7text}${params0}"
+        unset "params0"
+        unset "params1"
+        unset "params2"
     done
     clean_line
     tput sc
-    echo -ne $_VLINE
+     echo -ne "$_VLINE"
     _4len=""
-    _4len=$(wc -c < <(echo -n "$1"))
-    bsc_left=$(( (BSC_COLWIDTH - _4len)/2 - 1 ))
+    tmp9=$(mktemp)
+    $ECHO -n "$1" > "$tmp9"
+    _4len=$(wc -c < $tmp9)
+    bsc_left=$( BSC_COLWIDTH - _4len/2 - 1 )
 
-    params=( "$@")
-    [ "${params[0]}" = "left" ] && bsc_left=0
-    unset "params[0]"
-    params=( "${params[@]}" )
+    [ "${params0}" = "left" ] && bsc_left=0
+    unset "params0"
+    params0="$1"
+    params1="$2"
+    params2="$3"
     [ $bsc_left -gt 0 ] && tput cuf $bsc_left
-    while [ -n "${params}" ];do
-        setcolor "${params[1]}"
-        setbgcolor "${params[2]}"
-        echo -ne "${params[0]}"
+    while [ -n "${params0}" ];do
+        setcolor "${params1}"
+        setbgcolor "${params2}"
+         "$params0"
         reset_colors
-        unset "params[0]"
-        unset "params[1]"
-        unset "params[2]"
-        params=( "${params[@]}" )
+        unset "params0"
+        unset "params1"
+        unset "params2"
     done
     tput rc
     tput cuf $((BSC_COLWIDTH-1))
-    echo -ne $_VLINE
+    printf "$_VLINE"
     bsc__nl
 }
 #
@@ -563,9 +562,11 @@ bsc__multiappend(){
 bsc__append(){
     clean_line
     tput sc
-    echo -ne $_VLINE
+    printf  "$_VLINE"
     _5len=""
-    _5len=$(wc -c < <(echo -n "$1"))
+    tmp10=$(mktemp)
+    printf "$1" > "$tmp10"
+    _5len=$(wc -c < $tmp10)
     bsc_left=$(( (BSC_COLWIDTH - _5len)/2 - 1 ))
 
     [ "$2" = "left" ] && bsc_left=0
@@ -573,11 +574,11 @@ bsc__append(){
     [ $bsc_left -gt 0 ] && tput cuf $bsc_left
     setcolor "$3"
     setbgcolor "$4"
-    echo -ne "$1"
+    printf "$1"
     reset_colors
     tput rc
     tput cuf $((BSC_COLWIDTH-1))
-    echo -ne $_VLINE
+    printf "$_VLINE"
     bsc__nl
 }
 
@@ -587,9 +588,11 @@ append_tabbed(){
     [ "$3" != "" ] && delim=$3 || delim=":"
     clean_line
 
-    echo -ne $_VLINE
+    printf "$_VLINE"
     _6len=""
-    _6len=$(wc -c < <(echo -n "$1"))
+    tmp11=$(mktemp)
+    printf "$1" > "$tmp9"
+    _6len=$(wc -c < $tmp11)
     cell_wdt=$((BSC_COLWIDTH/$2))
 
     setcolor "$4"
@@ -601,27 +604,29 @@ append_tabbed(){
         tput rc
         cell_offset=$((cell_wdt*_i))
         [ $cell_offset -gt 0 ] && tput cuf $cell_offset
-        echo -n "$(echo -n "$1" | cut -f$((i+1)) -d"$delim" | cut -c 1-$((cell_wdt-3)))"
+        $ECHO -n "$(echo -n "$1" | cut -f$((i+1)) -d"$delim" | cut -c 1-$((cell_wdt-3)))"
     done
 
     tput rc
     reset_colors
     tput cuf $((BSC_COLWIDTH-2))
-    echo -ne $_VLINE
+    printf "$_VLINE"
     bsc__nl
 }
 
 #append a command output
 append_command(){
+    tmp20=$(mktemp)
+    $1 2>&1 | fold -w $((BSC_COLWIDTH-2)) -s > $tmp20
     while read -r line; do
         bsc__append "$line" left "$2" "$3"
-    done < <( $1 2>&1 | fold -w $((BSC_COLWIDTH-2)) -s)
+    done < $tmp20
     }
 
 #close the window display
 endwin(){
     # Plot bottom line
-    echo -ne "$_BL$BSC_LINEBODY$_BR"
+    printf "$_BL$BSC_LINEBODY$_BR"
     bsc__nl
 
     BSC_COLHGT=$(( BSC_COLHGT + BSC_WNDHGT ))
@@ -698,13 +703,8 @@ main_loop (){
     bsc_term_init
     bsc_init_chars
 
-    # if an update function has been defined, use it. Or just sleep
-    if [ "$(type update)" = "function" ]; then
-        update_fn="update"
-    else
-        update_fn="sleep"
-    fi
 
+        update_fn="sleep"
     # Capture screen size change in dashboard mode to clean it
     if [ "$BSC_MODE" = dashboard ]; then
         trap "tput clear" WINCH
@@ -712,7 +712,7 @@ main_loop (){
 
     while true; do
         reset_layout
-        echo -n "" > "$BSC_BUFFER"
+        echo "" > "$BSC_BUFFER"
         rm -f "$BSC_STDERR"
 
         if [ "$BSC_MODE" = dashboard ]; then
@@ -753,10 +753,3 @@ sigint_check (){
         kill -s INT "$$"
     fi
 }
-
-if [ "${BASH_SOURCE[0]}" = "${0}" ]; then
-    echo "This file is a library not meant to be run. Source it in a main script."
-    echo ""
-    usage
-    exit 1
-fi
