@@ -19,6 +19,8 @@
 
 ECHO=/bin/echo
 
+export captured_input=$(mktemp)
+
 bsc_create_buffer(){
     # Try to use SHM, then $TMPDIR, then /tmp
     if [ -d "/dev/shm" ]; then
@@ -501,7 +503,6 @@ progressbar(){
 }
 append(){
     tmp8=$(mktemp)
-    echo $1 > a
     printf "%s\n"  "$1" | fold -w $((BSC_COLWIDTH-2)) -s > $tmp8
     while read -r line; do
         bsc__append "$line" "$2" "$3" "$4"
@@ -696,6 +697,8 @@ parse_args (){
     done
 }
 
+
+
 #main loop called
 main_loop (){
     parse_args "$@"
@@ -733,12 +736,14 @@ main_loop (){
     
         [ $VERBOSE -gt 0 ] && [ -f "$BSC_STDERR" ] && cat "$BSC_STDERR" && rm "$BSC_STDERR"
 
-        $update_fn "$time"
+        sh -ic '{ read line; echo $line > $captured_input; kill 0; kill 0; } | { sleep 1; kill 0; }' 3>&1 2>/dev/null
+
         retval=$?
         if [ $retval -eq 255 ]; then
                 clean_env
                 exit "$retval"
         fi
+
 
         sigint_check
     done
