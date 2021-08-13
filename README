@@ -3,7 +3,7 @@ This is a POSIX-Compliant fork of BashSimpleCurses (github.com/metal3d/bashsimpl
 While I have not done extentive testing, it currently seems to work well enough with Bash, KSH, ZSH, Posh, and Dash
 
 ADDITIONAL FEATURES:
-- Limited support for non-breaking input (Saved to the file the $captured_input variable points to, but only when each time you press enter)
+- Limited support for non-breaking input (Saved to the file the $captured_input variable points to, but only each time you press enter)
 - Better ASCII detection
 - Switching to mktmp in the name of POSIX compliance, but also having the unfortunate side effect of bloating /tmp
 - A lot of opinionated internal feature removals
