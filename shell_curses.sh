@@ -37,9 +37,9 @@ bsc_create_buffer(){
     # Try to use mktemp before using the unsafe method
     if [ -x "$(which mktemp)" ]; then
         #mktemp --tmpdir=${BUFFER_DIR} ${_buffername}.XXXXXXXXXX
-        mktemp ${BUFFER_DIR}/${_buffername}.XXXXXXXXXX
+        mktemp
     else
-        echo "${BUFFER_DIR}/bashsimplecurses.$(mktemp)"
+        echo "$(mktemp)"
     fi
 }
 
@@ -644,37 +644,7 @@ endwin(){
 
 usage() {
     script_name=$(basename "$0")
-  cat <<EOF
-Usage: $script_name [options]
-
-Displays windows in a layout using commands. User defines a "main" function, then calls this script main loop. The current help presents the options of the main loop function, presentation mode and layout usage.
-
-General main_loop options:
-  -c, --crop: Title is spread over multiple lines if necessary. Usinc -c, the title will be cropped to fit in window width.
-  -h, --help: displays this help message.
-  -t, --time [t] : Sleep time, in seconds, when no "update" function has been defined, this option is used when calling the "update" function
-  -s, --scroll: set presentation to scrolling mode. See "Presentation mode section".
-  -q, --quiet: there will be no warning messages at all
-  -v, --verbose: add debug messages after the layout.
-
-Presentation mode:
-  The screen is either managed as a static dashboard (default) or scrolling mode. The later enables seeing older displays by scrolling back in the terminal emulator window.
-  In static mode, the window is cleared and the layout is reset to top left corner.
-  In scrolling mode, the window is not cleared and the layout is just reset to the left border, leaving older display available for reading.
-  Some window, like progress bar, loose their interest in scrolling mode, but are compatible.
-  In scrolling mode, new layout starts under the previous one. There is no screen clearing. In default, dashboard mode, the cursor is placed at the top left corner.
-
-Layout usage:
-  Start window creation using "window" function. Width can be direct and percent of the full display area. User can enter more than 100%, there is no consistency check, result in unpredictable.
-  End window creation using "endwin" function
-  Windows can only be placed next to each other using "col_right" and/or "move_up" functions. This leads to 4 possible placement:
-  - window under the previous one : start new window directly after endwin
-  - Window on the right of the previous one : use col_right
-  - Window on the right starting from first line : use col_right then move_up
-  - Start from the bottom of the current one, first row : use move_up
-  See examples, especially wintest.sh to see all possible usages.
-
-EOF
+    printf "See BashSimpleCurses for usage\n"
 }
 
 parse_args (){
@@ -706,9 +676,6 @@ main_loop (){
     bsc_term_init
     bsc_init_chars
 
-
-        update_fn="sleep"
-    # Capture screen size change in dashboard mode to clean it
     if [ "$BSC_MODE" = dashboard ]; then
         trap "tput clear" WINCH
     fi
@@ -736,7 +703,7 @@ main_loop (){
     
         [ $VERBOSE -gt 0 ] && [ -f "$BSC_STDERR" ] && cat "$BSC_STDERR" && rm "$BSC_STDERR"
 
-        sh -ic '{ read line; echo $line > $captured_input; kill 0; kill 0; } | { sleep 1; kill 0; }' 3>&1 2>/dev/null
+        bash -ic '{ read line; echo $line > $captured_input; kill 0; kill 0; } | { sleep 0.3; kill 0; }' 3>&1 2>/dev/null
 
         retval=$?
         if [ $retval -eq 255 ]; then
