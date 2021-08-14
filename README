@@ -1,10 +1,11 @@
 This is a POSIX-Compliant fork of BashSimpleCurses (github.com/metal3d/bashsimplecurses)
 
-While I have not done extentive testing, it currently seems to work well enough with Bash, KSH, ZSH, Posh, and Dash
+It currently seems to work perfectly with Bash, KSH, ZSH, Posh, and Dash
+
+A fully functional two-player Tic-Tac-Toe demo is included.
 
 ADDITIONAL FEATURES:
-- Limited support for non-breaking input (Saved to the file the $captured_input variable points to, but only each time you press enter)
+- Limited support for input (Only updated when enter/newline is pressed)
 - Better ASCII detection
-- Switching to mktmp in the name of POSIX compliance, but also having the unfortunate side effect of bloating /tmp
-- A lot of opinionated internal feature removals
-- A (probably) fully intact behaviour
+- A lot of opinionated internal feature changes
+- Mostly intact compatibility with scripts written for BashSimpleCurses
