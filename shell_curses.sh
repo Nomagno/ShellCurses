@@ -1,23 +1,38 @@
 #!/bin/sh
 #simple curses library to create windows on terminal
 #
-#author: Patrice Ferlet metal3d@copix.org
-##license: new BSD
+#ShellCurses patch by Nomagno
+#
+#original author: Patrice Ferlet metal3d@copix.org
 #
 #create_buffer patch by Laurent Bachelier
-#
-#POSIX Compliance patch by Nomagno
-#
-#restriction to local variables and
-#rename variables to ones which will not collide
-#by Markus Mikkolainen
-#
 #support for bgcolors by Markus Mikkolainen
 #
-#support for delay loop function (instead of sleep
-#enabling keyboard input) by Markus Mikkolainen
+##license: new BSD
+#
 
-ECHO=/bin/echo
+version() {
+  printf 'Version 1.0\n'
+}
+
+usage() {
+
+  printf 'USAGE AFTER SOURCING\nwindow TITLE COLOR [WIDTH] | create a window with title, color and width
+append TEXT [CENTERING] [COLOR] [BGCOLOR] | append text to the window
+addsep | add separator
+main_loop | initialization\n
+Please see the included tictactoe example for more information and auxiliary commands.\n'
+}
+
+if [ "$1" = "-v"  ] || [ "$1" = "--version"  ]; then
+  version
+  exit
+elif [ "$1" = "-h"  ] || [ "$1" = "--help"  ]; then
+  usage
+  exit
+fi
+
+VERBOSE=1
 
 export captured_input=$(mktemp)
 
@@ -35,17 +50,13 @@ bsc_create_buffer(){
     [ "$1" != "" ] &&  _buffername=$1 || _buffername="bashsimplecurses"
 
     # Try to use mktemp before using the unsafe method
-    if [ -x "$(which mktemp)" ]; then
-        #mktemp --tmpdir=${BUFFER_DIR} ${_buffername}.XXXXXXXXXX
-        mktemp
-    else
-        echo "$(mktemp)"
-    fi
+    echo "$(mktemp)"
 }
 
 #Usefull variables
 BSC_BUFFER=$(bsc_create_buffer)
 BSC_STDERR=$(bsc_create_buffer stderr)
+
 
 reset_layout() {
     BSC_COLLFT=0
@@ -178,7 +189,6 @@ backtotoprow () {
 
 #Append a window 
 window() {
-    _title=""
     _color=""
     _bgcolor=""
     _title=$1
@@ -259,10 +269,6 @@ window() {
     _len=""
     _len=${#_title}
 
-    if [ "$BSC_TITLECROP" -eq 1 ] && [ "$_len" -gt "$contentLen" ]; then
-        _title="${_title:0:$contentLen}"
-        _len=${#_title}
-    fi
 
     bsc_left=$(( (bsc_cols - _len)/2 -1 ))
 
@@ -359,7 +365,7 @@ setbgcolor(){
 #append a separator, new line
 addsep (){
     clean_line
-    $ECHO -ne "$_SEPL$BSC_LINEBODY$_SEPR"
+    printf "$_SEPL$BSC_LINEBODY$_SEPR\n"
     bsc__nl
 }
 
@@ -369,7 +375,7 @@ clean_line(){
     reset_colors
 
     tput sc
-    $ECHO -ne  "$BSC_BLANKLINE"
+    printf  "$BSC_BLANKLINE"
     #tput el
     tput rc
 }
@@ -381,126 +387,7 @@ append_file(){
     shift
     append_command "cat $_filetoprint" "$@"
 }
-#
-#   blinkenlights <text> <color> <color2> <incolor> <bgcolor> <light1> [light2...]
-#
-blinkenlights(){
-    _2color=""
-    _color2=""
-    _2incolor=""
-    _3bgcolor=""
-    _2lights=""
-    _2col=""
-    _2text=""
-    _2text=$1
-    _2color=$2
-    _color2=$3
-    _2incolor=$4
-    _3bgcolor=$5
 
-    params0="$1"
-    params1="$2"
-    params2="$3"
-    params3="$4"
-    params4="$5"
-    params5="$6"
-
-    _2lights=""
-    while [ -n "$params0" ];do
-        _2col=$_2incolor
-        [ "${params0}" = "1" ] && _2col=$_2color
-        [ "${params0}" = "2" ] && _2col=$_color2
-        _2lights="${_2lights} ${_DIAMOND} ${_2col} ${_3bgcolor}"
-        unset "params0"
-        
-    done
-
-    bsc__multiappend "left" "[" "$_2incolor" "$_3bgcolor" "$_2lights" "]${_2text}" "$_2incolor" "$_3bgcolor"
-}
-
-#
-#   vumeter <text> <width> <value> <max> [color] [color2] [inactivecolor] [bgcolor]
-#
-vumeter(){
-    _done=""
-    _todo=""
-    _over=""
-    _2len=""
-    _max=""
-
-    _green=""
-    _red=""
-    _rest=""
-
-    _3incolor=""
-    _3okcolor=""
-    _3overcolor=""
-    _text=$1
-    _2len=$2
-    _value=$3
-    _max=$4
-    _2len=$(( _2len - 2 ))
-    _3incolor=$7
-    _3okcolor=$5
-    _3overcolor=$6
-    [ "$_3incolor" = "" ] && _3incolor="grey"
-    [ "$_3okcolor" = "" ] && _3okcolor="green"
-    [ "$_3overcolor" = "" ] && _3overcolor="red"
-
-    done=$(( _value * _2len / _max  + 1 ))
-    todo=$(( _2len - done - 1))
-
-    [ "$(( _2len * 2 / 3 ))" -lt "$done" ] && {
-        _over=$(( done - ( _2len * 2 /3 )))
-        _done=$(( _2len * 2 / 3 ))
-    }
-    _green=""
-    _red=""
-    _rest=""
-
-    for i in $(seq 1 $(($_done)));do
-        _green="${_green}|"
-    done
-    for i in $(seq 0 $(($_over)));do
-        _red="${_red}|"
-    done
-    _red=${_red}
-    for i in $(seq 0 $(($_todo)));do
-        _rest="${_rest}."
-    done
-    [ "$_red" = ""  ] && bsc__multiappend "left" "[" $_3incolor "black" "${_green}" $_3okcolor "black" "${_rest}]${_text}" $_3incolor "black"
-    [ "$_red" != ""  ] && bsc__multiappend "left" "[" $_3incolor "black" "${_green}" $_3okcolor "black" "${_red}" $_3overcolor "black" "${_rest}]${_text}" $_3incolor "black"
-}
-#
-#
-#
-#   progressbar <length> <progress> <max> [color] [bgcolor]
-#
-progressbar(){
-    _done=""
-    _todo=""
-    _3len=""
-    _5progress=""
-    _5max=""
-    _bar=""
-    _modulo=""
-    _3len=$1
-    _5progress=$2
-    _5max=$3
- 
-    _done=$(( _5progress * _3len / _5max ))
-    _todo=$(( _3len - _done - 1 ))
-    _modulo=$(( $(date +%s) % 4 ))
-
-    bar="[";
-
-    if [ "$_done" -lt "$_3len" ]; then
-        bar="${_bar}${_SPINNER}"
-    fi
-
-    bar="${_bar}]"
-    bsc__append "$_bar" "left" "$4" "$5"
-}
 append(){
     tmp8=$(mktemp)
     printf "%s\n"  "$1" | fold -w $((BSC_COLWIDTH-2)) -s > $tmp8
@@ -508,55 +395,7 @@ append(){
         bsc__append "$line" "$2" "$3" "$4"
     done < $tmp8
 }
-#
-#   append a single line of text consisting of multiple
-#   segments
-#   bsc__multiappend <centering> (<text> <color> <bgcolor>)+
-#
-bsc__multiappend(){
-    _4len=""
-    _7text=""
-    declare -a params
-    params0="$1"
-    params1="$2"
-    params2="$3"
-    _text=""
-    unset "params0"
-    while [ -n "$params" ];do
-        _text="${_7text}${params0}"
-        unset "params0"
-        unset "params1"
-        unset "params2"
-    done
-    clean_line
-    tput sc
-     echo -ne "$_VLINE"
-    _4len=""
-    tmp9=$(mktemp)
-    $ECHO -n "$1" > "$tmp9"
-    _4len=$(wc -c < $tmp9)
-    bsc_left=$( BSC_COLWIDTH - _4len/2 - 1 )
 
-    [ "${params0}" = "left" ] && bsc_left=0
-    unset "params0"
-    params0="$1"
-    params1="$2"
-    params2="$3"
-    [ $bsc_left -gt 0 ] && tput cuf $bsc_left
-    while [ -n "${params0}" ];do
-        setcolor "${params1}"
-        setbgcolor "${params2}"
-         "$params0"
-        reset_colors
-        unset "params0"
-        unset "params1"
-        unset "params2"
-    done
-    tput rc
-    tput cuf $((BSC_COLWIDTH-1))
-    printf "$_VLINE"
-    bsc__nl
-}
 #
 #   bsc__append <text> [centering] [color] [bgcolor]
 #
@@ -583,46 +422,6 @@ bsc__append(){
     bsc__nl
 }
 
-#add separated values on current window
-append_tabbed(){
-    [ $2 = "" ] && echo "append_tabbed: Second argument needed" >&2 && exit 1
-    [ "$3" != "" ] && delim=$3 || delim=":"
-    clean_line
-
-    printf "$_VLINE"
-    _6len=""
-    tmp11=$(mktemp)
-    printf "$1" > "$tmp9"
-    _6len=$(wc -c < $tmp11)
-    cell_wdt=$((BSC_COLWIDTH/$2))
-
-    setcolor "$4"
-    setbgcolor "$5"
-    tput sc
-
-    _i=""
-    for _i in $(seq 0 $(($2))); do
-        tput rc
-        cell_offset=$((cell_wdt*_i))
-        [ $cell_offset -gt 0 ] && tput cuf $cell_offset
-        $ECHO -n "$(echo -n "$1" | cut -f$((i+1)) -d"$delim" | cut -c 1-$((cell_wdt-3)))"
-    done
-
-    tput rc
-    reset_colors
-    tput cuf $((BSC_COLWIDTH-2))
-    printf "$_VLINE"
-    bsc__nl
-}
-
-#append a command output
-append_command(){
-    tmp20=$(mktemp)
-    $1 2>&1 | fold -w $((BSC_COLWIDTH-2)) -s > $tmp20
-    while read -r line; do
-        bsc__append "$line" left "$2" "$3"
-    done < $tmp20
-    }
 
 #close the window display
 endwin(){
@@ -639,39 +438,14 @@ endwin(){
     if [ $BSC_COLBOT -gt $BSC_COLHGT_MAX ]; then
         BSC_COLHGT_MAX=$BSC_COLBOT
     fi
+    
     [ "$VERBOSE" -eq 2 ] && echo "End of window $_title" >&2
-}
-
-usage() {
-    script_name=$(basename "$0")
-    printf "See BashSimpleCurses for usage\n"
-}
-
-parse_args (){
-    BSC_MODE=dashboard
-    VERBOSE=1
-    BSC_TITLECROP=0
-    time=1
-    while [ $# -gt 0 ]; do
-        # shellcheck disable=SC2034
-        case "$1" in
-        -c | --crop )        BSC_TITLECROP=1; shift 1 ;;
-        -h | --help )        usage; exit 0 ;;
-        -q | --quiet )       VERBOSE=0; shift 1 ;;
-        -s | --scroll )      BSC_MODE=scroll; shift 1 ;;
-        -t | --time )        time=$2; shift 2 ;;
-        -V | --verbose )     VERBOSE=2; shift 1 ;;
-        -- ) return 0 ;;
-        * ) echo "Option $1 does not exist"; exit 1;;
-        esac
-    done
 }
 
 
 
 #main loop called
 main_loop (){
-    parse_args "$@"
 
     bsc_term_init
     bsc_init_chars
@@ -703,7 +477,7 @@ main_loop (){
     
         [ $VERBOSE -gt 0 ] && [ -f "$BSC_STDERR" ] && cat "$BSC_STDERR" && rm "$BSC_STDERR"
 
-        bash -ic '{ read line; echo $line > $captured_input; kill 0; kill 0; } | { sleep 0.3; kill 0; }' 3>&1 2>/dev/null
+        bash -ic '{ read line; echo "$line" > $captured_input; kill 0; kill 0; } | { sleep 0.3; kill 0; }' 3>&1 2>/dev/null
 
         retval=$?
         if [ $retval -eq 255 ]; then
@@ -715,6 +489,8 @@ main_loop (){
         sigint_check
     done
 }
+
+
 # Calls to this function are placed so as to avoid stdout mangling
 sigint_check (){
     if [ $BSC_SIGINT -eq 1 ]; then

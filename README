@@ -6,5 +6,4 @@ ADDITIONAL FEATURES:
 - Limited support for non-breaking input (Saved to the file the $captured_input variable points to, but only each time you press enter)
 - Better ASCII detection
 - Switching to mktmp in the name of POSIX compliance, but also having the unfortunate side effect of bloating /tmp
-- A lot of opinionated internal feature removals
-- A (probably) fully intact behaviour
+- A lot of opinionated feature removals

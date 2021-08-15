@@ -9,8 +9,7 @@ score2=0
 
 compose1=""
 compose2=""
-compose3=""
-
+compose3="" 
 
 
 p1=""
