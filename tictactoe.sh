@@ -64,7 +64,12 @@ tictactoe() {
   processed_input=$(cat "$captured_input")
   p1=${processed_input#[q]}
   p2=${processed_input#[w]}
+  pc=$(echo "$processed_input" | grep -o "c")
 
+  if [ "$pc" = "c" ]; then 
+    board_reset
+  fi
+  
   if [ "$p1" = "1" ] && [ "$c1" != "C" ]; then
     c1="X"
     pc1="$Cross"
@@ -197,6 +202,7 @@ tictactoe() {
   echo > "$captured_input"
   p1=""
   p2=""
+  pc=""
 
 }
 
@@ -206,7 +212,7 @@ main() {
 
     tictactoe
     window "TicTacToe" "grey" "100%"
-    append "$(printf "How to play: P1 - q | P2 - w \n"; printf "PN - the player letter and the cell number, e.g q5\n"; printf "SCORE: CROSS - $score1 ||| CIRCLE - $score2 \n")"
+    append "$(printf "How to play: P1 - q | P2 - w | Clear - c\n"; printf "PN - the player letter and the cell number, e.g q5\n"; printf "SCORE: CROSS - $score1 ||| CIRCLE - $score2 \n")"
     endwin
     
     window "column1" "green" "33%"
