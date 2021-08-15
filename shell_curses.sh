@@ -11,10 +11,10 @@
 ##license: new BSD
 #
 
+
 version() {
   printf 'Version 1.0\n'
 }
-
 usage() {
 
   printf 'USAGE AFTER SOURCING\nwindow TITLE COLOR [WIDTH] | create a window with title, color and width
@@ -32,7 +32,8 @@ elif [ "$1" = "-h"  ] || [ "$1" = "--help"  ]; then
   exit
 fi
 
-VERBOSE=1
+VERBOSE=0
+BSC_MODE="dashboard"
 
 export captured_input=$(mktemp)
 
