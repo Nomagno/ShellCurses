@@ -380,14 +380,6 @@ clean_line(){
     tput rc
 }
 
-#add text on current window
-append_file(){
-    _filetoprint=""
-    _filetoprint=$1
-    shift
-    append_command "cat $_filetoprint" "$@"
-}
-
 append(){
     tmp8=$(mktemp)
     printf "%s\n"  "$1" | fold -w $((BSC_COLWIDTH-2)) -s > $tmp8
