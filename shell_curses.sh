@@ -132,22 +132,9 @@ col_right(){
 }
 
 #initialize chars to use
-_TL="\033(0l\033(B"
-_TR="\033(0k\033(B"
-_BL="\033(0m\033(B"
-_BR="\033(0j\033(B"
-_SEPL="\033(0t\033(B"
-_SEPR="\033(0u\033(B"
-_VLINE="\033(0x\033(B"
-_HLINE="\033(0q\033(B"
-_DIAMOND="\033(00\033(B"
-_BLOCK="\033(01\033(B"
-_SPINNER='-'
+
 
 bsc_init_chars() {
-
-    if [ "$LANG" != "" ]; then
-        if [ $(printf "\xE2\x96\x88") = "\\xE2\\x96\\x88" ]; then
             _TL="+"
             _TR="+"
             _BL="+"
@@ -156,21 +143,9 @@ bsc_init_chars() {
             _SEPR="+"
             _VLINE="|"
             _HLINE="-"
+            SPINNER='-'
             _DIAMOND="*"
             _BLOCK="#"
-        elif [ $(echo "$LANG" | grep -c UTF) = "1" ]; then
-            _TL="\xE2\x94\x8C"
-            _TR="\xE2\x94\x90"
-            _BL="\xE2\x94\x94"
-            _BR="\xE2\x94\x98"
-            _SEPL="\xE2\x94\x9C"
-            _SEPR="\xE2\x94\xA4"
-            _VLINE="\xE2\x94\x82"
-            _HLINE="\xE2\x94\x80"
-            _DIAMOND="\xE2\x97\x86"
-            _BLOCK="\xE2\x96\x88"
-        fi
-    fi
 }
 
 backtotoprow () {
@@ -239,7 +214,7 @@ window() {
     BSC_NEWWIN_RGT_REQ=0
     BSC_WNDHGT=0
 
-    bsc_cols=$(tput cols)
+    bsc_cols=$(expr $(tput cols) - 3)
     case $3  in
         "" )
             # No witdh given
@@ -366,7 +341,7 @@ setbgcolor(){
 #append a separator, new line
 addsep (){
     clean_line
-    printf "$_SEPL$BSC_LINEBODY$_SEPR\n"
+    printf "%s" "$BSC_LINEBODY"
     bsc__nl
 }
 
@@ -376,7 +351,7 @@ clean_line(){
     reset_colors
 
     tput sc
-    printf  "$BSC_BLANKLINE"
+    printf "$BSC_BLANKLINE"
     #tput el
     tput rc
 }

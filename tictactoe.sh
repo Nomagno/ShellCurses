@@ -174,9 +174,9 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
+  fi
 
-
-  elif [ "$c1" = "$c4"  ] && [ "$c4" = "$c7" ]; then
+  if [ "$c1" = "$c4"  ] && [ "$c4" = "$c7" ]; then
     if [ "$c1" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -184,7 +184,8 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
-  elif [ "$c2" = "$c5"  ] && [ "$c5" = "$c8" ]; then
+  fi
+  if [ "$c2" = "$c5"  ] && [ "$c5" = "$c8" ]; then
     if [ "$c2" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -192,7 +193,8 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
-  elif [ "$c3" = "$c6"  ] && [ "$c6" = "$c9" ]; then
+  fi
+  if [ "$c3" = "$c6"  ] && [ "$c6" = "$c9" ]; then
       if [ "$c3" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -200,9 +202,9 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
+  fi
 
-
-  elif [ "$c1" = "$c5"  ] && [ "$c5" = "$c9" ]; then
+  if [ "$c1" = "$c5"  ] && [ "$c5" = "$c9" ]; then
     if [ "$c1" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -210,7 +212,8 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
-  elif [ "$c7" = "$c5"  ] && [ "$c5" = "$c3" ]; then
+  fi
+  if [ "$c7" = "$c5"  ] && [ "$c5" = "$c3" ]; then
     if [ "$c7" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -253,11 +256,6 @@ main() {
 
     move_up
 
-    if [ "$arglite" != "1"  ]; then
-    window "TicTacClock" "grey" "100%"
-    append "$(date +%H:%M:%S)"
-    endwin
-    fi
 
   }
 
