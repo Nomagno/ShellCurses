@@ -158,7 +158,8 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
-  elif [ "$c4" = "$c5"  ] && [ "$c5" = "$c6" ]; then
+  fi
+  if [ "$c4" = "$c5"  ] && [ "$c5" = "$c6" ]; then
     if [ "$c4" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
@@ -166,7 +167,8 @@ tictactoe() {
       board_reset
       score2=$(( score2 + 1 ))
     fi
-  elif [ "$c7" = "$c8"  ] && [ "$c8" = "$c9" ]; then
+  fi
+  if [ "$c7" = "$c8"  ] && [ "$c8" = "$c9" ]; then
     if [ "$c7" = "X" ]; then
       board_reset
       score1=$(( score2 + 1 ))
