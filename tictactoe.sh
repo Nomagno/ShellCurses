@@ -3,7 +3,7 @@
 
 
 if [ "$1" = "-u"  ] || [ "$1" = "--usage"  ]; then
-printf 'How to play: P1 - q | P2 - w | Clear - c\nPN - the player letter and the cell number, e.g q5\nSCORE: CROSS - $score1 ||| CIRCLE - $score2 \n\n'
+printf 'How to play: P1 - q | P2 - w | Clear - c\nPN - the player letter and the cell number, e.g q5\n'
 printf 'USE THE "lite" ARGUMENT TO TOGGLE SMALL SCREEN TICTACTOE\n'
 exit
 
