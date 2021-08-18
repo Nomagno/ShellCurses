@@ -206,7 +206,6 @@ window() {
         * )
         echo "Unexpected window position requirement"
         clean_env
-        exit 1
     esac
 
     # Reset window position mechanism for next window
@@ -445,13 +444,7 @@ main_loop (){
     
         [ $VERBOSE -gt 0 ] && [ -f "$BSC_STDERR" ] && cat "$BSC_STDERR" && rm "$BSC_STDERR"
 
-        bash -ic '{ read line; echo "$line" > $captured_input; kill 0; kill 0; } | { sleep 0.3; kill 0; }' 3>&1 2>/dev/null
-
-        retval=$?
-        if [ $retval -eq 255 ]; then
-                clean_env
-                exit "$retval"
-        fi
+        dash -ic '{ read line; echo "$line" > $captured_input; kill 0; kill 0; } | { sleep 0.3; kill 0; }' 3>&1 2>/dev/null
 
 
         sigint_check
