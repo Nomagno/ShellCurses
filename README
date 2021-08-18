@@ -6,5 +6,4 @@ A fully functional two-player Tic-Tac-Toe demo is included.
 
 ADDITIONAL FEATURES:
 - Limited support for input (Only updated when enter/newline is pressed)
-- Better ASCII detection
-- Some opinionated feature removals
+- Most features not related directly to window compositing have been removed
