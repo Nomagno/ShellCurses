@@ -1,8 +1,29 @@
 #!/bin/sh
 . ./shell_curses.sh
+
+
+if [ "$1" = "-u"  ] || [ "$1" = "--usage"  ]; then
+printf 'How to play: P1 - q | P2 - w | Clear - c\nPN - the player letter and the cell number, e.g q5\nSCORE: CROSS - $score1 ||| CIRCLE - $score2 \n\n'
+printf 'USE THE "lite" ARGUMENT TO TOGGLE SMALL SCREEN TICTACTOE\n'
+exit
+
+elif [ "$1" = "lite"  ]; then
+Cross="x\n"
+Circle="o\n"
+Empty="e\n"
+col1="1"
+col2="2"
+col3="3"
+arglite="1"
+
+else
 Cross=" X       X \\n   X   X   \\n     X     \\n   X   X   \\n X       X \\n\\n\\n\\n\\n"
 Circle="   0O O0   \\n 0       0 \\n0         0\\n0         0\\n0         0\\n 0       0\\n   0O O0   \\n\\n\\n"
 Empty="____________\\n|          |\\n|          |\\n|          |\\n|          |\\n____________\\n\\n\\n\\n"
+col1="column 1"
+col2="column 2"
+col3="column 3"
+fi
 
 score1=0
 score2=0
@@ -208,34 +229,35 @@ tictactoe() {
 
 main() {
 
-
-
     tictactoe
+    if [ "$arglite" != "1"  ]; then
     window "TicTacToe" "grey" "100%"
     append "$(printf "How to play: P1 - q | P2 - w | Clear - c\n"; printf "PN - the player letter and the cell number, e.g q5\n"; printf "SCORE: CROSS - $score1 ||| CIRCLE - $score2 \n")"
     endwin
-    
-    window "column1" "green" "33%"
+    fi
+    window "$col1" "green" "33%"
     append "$(printf "${pc1}"; printf "${pc4}"; printf "${pc7}")"
     endwin
 
     col_right
 
-    window "column2" "red" "33%"
+    window "$col2" "red" "33%"
     append "$(printf "${pc2}"; printf "${pc5}"; printf "${pc8}")"
     endwin
 
     col_right
     
-    window "column3" "blue" "33%"
+    window "$col3" "blue" "33%"
     append "$(printf "${pc3}"; printf "${pc6}"; printf "${pc9}")"
     endwin
 
     move_up
 
+    if [ "$arglite" != "1"  ]; then
     window "TicTacClock" "grey" "100%"
     append "$(date +%H:%M:%S)"
     endwin
+    fi
 
   }
 
