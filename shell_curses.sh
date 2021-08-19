@@ -117,7 +117,7 @@ bsc_term_init(){
 bsc__nl(){
     BSC_WNDHGT=$((BSC_WNDHGT+1))
     tput cud1
-    tput cub "$(tput cols)"
+    tput cub "$(expr $(tput cols) - 3)"
     [ $BSC_WLFT -gt 0 ] && tput cuf $BSC_WLFT
     tput sc
 }
