@@ -214,7 +214,7 @@ window() {
     BSC_NEWWIN_RGT_REQ=0
     BSC_WNDHGT=0
 
-    bsc_cols=$(expr $(tput cols) - 3)
+    bsc_cols=$(expr $(expr $(tput cols) - 3) - 3)
     case $3  in
         "" )
             # No witdh given
@@ -249,7 +249,7 @@ window() {
     bsc_left=$(( (bsc_cols - _len)/2 -1 ))
 
     # Init top left window corner
-    tput cub "$(tput cols)"
+    tput cub "$(expr $(tput cols) - 3)"
     [ $BSC_WLFT -gt 0 ] && tput cuf $BSC_WLFT
     tput sc
 
@@ -436,7 +436,7 @@ main_loop (){
 
         # Go under the higest column, from under the last displayed window
         tput cud $(( BSC_COLHGT_MAX - BSC_COLBOT )) >> "$BSC_BUFFER"
-        tput cub "$(tput cols)" >> "$BSC_BUFFER"
+        tput cub "$(expr $(tput cols) - 3)" >> "$BSC_BUFFER"
 
         sigint_check
 
